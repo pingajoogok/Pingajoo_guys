@@ -1,0 +1,4 @@
+# Pingajoo - Git Ignore
+node_modules/
+add_user.js
+package-lock.json

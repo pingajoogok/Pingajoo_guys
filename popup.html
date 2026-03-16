@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pingajoo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0f;
+            color: #e2e8f0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            width: 400px;
+            min-height: 300px;
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Scrollbar */
+        body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+        }
+
+        /* Background gradient orbs */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(236, 72, 153, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            padding: 24px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== LOGIN PAGE ===== */
+        .login-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 24px;
+            min-height: 400px;
+            justify-content: center;
+        }
+
+        .login-logo {
+            width: 150px;
+            height: 150px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .login-logo:hover {
+            transform: scale(1.05) rotate(-2deg);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .login-subtitle {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: rgba(129, 140, 248, 0.5);
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1),
+                0 0 20px rgba(129, 140, 248, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .form-input::placeholder {
+            color: #475569;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.01em;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.1) 50%, transparent 60%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .login-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        /* ===== STATUS & ERROR ===== */
+        #statusMessage {
+            font-size: 0.8rem;
+            text-align: center;
+            color: #818cf8;
+            min-height: 20px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        #error {
+            font-size: 0.8rem;
+            text-align: center;
+            color: #f87171;
+            min-height: 20px;
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        /* ===== DASHBOARD (LOGGED IN) ===== */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .dashboard-logo {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+        }
+
+        .dashboard-info {
+            flex: 1;
+        }
+
+        .dashboard-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            letter-spacing: -0.01em;
+        }
+
+        .dashboard-user {
+            font-size: 0.75rem;
+            color: #818cf8;
+            font-weight: 500;
+        }
+
+        .dashboard-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.15));
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        /* ===== TABS ===== */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 10px 0;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .tab-button:hover {
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-button.active {
+            background: rgba(99, 102, 241, 0.12);
+            color: #a5b4fc;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== SHORTCUTS ===== */
+        .section-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        .section-card:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-title .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-green {
+            background: #34d399;
+            box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+        }
+
+        .dot-blue {
+            background: #818cf8;
+            box-shadow: 0 0 8px rgba(129, 140, 248, 0.4);
+        }
+
+        .dot-orange {
+            background: #fb923c;
+            box-shadow: 0 0 8px rgba(251, 146, 60, 0.4);
+        }
+
+        .dot-red {
+            background: #f87171;
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.4);
+        }
+
+        .shortcut-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+        }
+
+        .shortcut-row+.shortcut-row {
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .shortcut-desc {
+            font-size: 0.78rem;
+            color: #cbd5e1;
+            flex: 1;
+        }
+
+        .shortcut-keys {
+            display: flex;
+            gap: 3px;
+            flex-shrink: 0;
+        }
+
+        .key {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #a5b4fc;
+            white-space: nowrap;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .shortcut-tag {
+            font-size: 0.6rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .tag-beta {
+            background: rgba(251, 191, 36, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .tag-select {
+            background: rgba(251, 146, 60, 0.1);
+            color: #fb923c;
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+
+        /* ===== OPTIONS TAB ===== */
+        .option-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .option-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .option-desc {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Toggle */
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-track {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .toggle-track::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 2px;
+            bottom: 2px;
+            background: #94a3b8;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle input:checked+.toggle-track {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .toggle input:checked+.toggle-track::before {
+            transform: translateX(20px);
+            background: #818cf8;
+            box-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
+        }
+
+        /* API Form */
+        .api-form {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .api-form .form-group {
+            margin-bottom: 10px;
+        }
+
+        .api-form .form-input,
+        .api-form select {
+            padding: 10px 12px;
+            font-size: 0.8rem;
+        }
+
+        .api-form select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .api-form select option {
+            background: #1e1e2e;
+            color: #e2e8f0;
+        }
+
+        .test-btn {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.08);
+            color: #a5b4fc;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        /* Opacity btn */
+        .opacity-btn {
+            padding: 5px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #a5b4fc;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .opacity-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            color: #94a3b8;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #e2e8f0;
+        }
+
+        .btn-danger {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.05);
+            color: #f87171;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Glow text (for status) */
+        .glow {
+            text-shadow: 0 0 8px rgba(129, 140, 248, 0.6);
+        }
+        /* ===== WARNING BOX ===== */
+        .warning-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-top: 24px;
+            padding: 14px 16px;
+            background: rgba(251, 191, 36, 0.03);
+            border: 1px solid rgba(251, 191, 36, 0.15);
+            border-left: 3px solid #fbbf24;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .warning-icon {
+            color: #fbbf24;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .warning-text {
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: #94a3b8;
+        }
+
+        .warning-text strong {
+            color: #fbbf24;
+            font-weight: 700;
+        }
+
+        /* ===== SIGNUP LINK ===== */
+        .signup-container {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .signup-link {
+            color: #06b6d4;
+            font-weight: 700;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link:hover {
+            color: #22d3ee;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ===== LOGIN FORM ===== -->
+    <form id="loginForm" class="login-page">
+        <div id="statusMessage" class="glow"></div>
+        <img src="images/pingajoo_logo.png" alt="Pingajoo" class="login-logo">
+        <div class="login-title">Pingajoo</div>
+        <div class="login-subtitle">Sign in to continue</div>
+
+        <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" required class="form-input" placeholder="Enter your username"
+                autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" required class="form-input" placeholder="Enter your password">
+        </div>
+
+        <button type="submit" class="login-btn">Sign In</button>
+        <div id="error"></div>
+
+        <div class="warning-box">
+            <svg class="warning-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div class="warning-text">
+                After creating an account, it must be used only by the registered user. Sharing your account credentials with others is <strong>strictly prohibited</strong>. If our system detects credential sharing, the account will be <strong>permanently blocked from using this extension</strong>. Be careful!
+            </div>
+        </div>
+
+        <div class="signup-container">
+            No account? <a href="#" id="createAccountBtn" class="signup-link">Create one</a>
+        </div>
+    </form>
+
+    <!-- ===== DASHBOARD (LOGGED IN) ===== -->
+    <div id="loggedInContent" class="hidden">
+        <div class="container">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <img src="images/pingajoo_logo.png" alt="Pingajoo" class="dashboard-logo">
+                <div class="dashboard-info">
+                    <div class="dashboard-title">Pingajoo</div>
+                    <div class="dashboard-user" id="welcomeUser">Welcome back</div>
+                </div>
+                <span class="dashboard-badge">● Active</span>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-nav">
+                <button class="tab-button active" data-tab="shortcuts-tab">⌨️ Shortcuts</button>
+                <button class="tab-button" data-tab="options-tab">⚙️ Settings</button>
+            </div>
+
+            <!-- Shortcuts Tab -->
+            <div id="shortcuts-tab" class="tab-content active">
+                <!-- Examly/Iamneo -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <span class="dot dot-green"></span>
+                        <span style="color: #34d399;">Examly / Iamneo</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Answer with 100% Accuracy</span>
+                        <div class="shortcut-keys">
+                            <span class="key">Ctrl</span><span class="key">⇧</span><span class="key">Q</span>
+                        </div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Type Coding Answers</span>
+                        <div class="shortcut-keys">
+                            <span class="key">Ctrl</span><span class="key">⇧</span><span class="key">T</span>
+                        </div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Search Answers via AI</span>
+                        <div class="shortcut-keys">
+                            <span class="key shortcut-key">Alt</span><span class="key">⇧</span><span
+                                class="key">A</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Universal -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <span class="dot dot-blue"></span>
+                        <span style="color: #a5b4fc;">Universal</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">AI Search <span class="shortcut-tag tag-select">SELECT</span></span>
+                        <div class="shortcut-keys">
+                            <span class="key shortcut-key">Alt</span><span class="key">⇧</span><span
+                                class="key">S</span>
+                        </div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Solve MCQs <span
+                                class="shortcut-tag tag-select">SELECT</span></span>
+                        <div class="shortcut-keys">
+                            <span class="key shortcut-key">Alt</span><span class="key">⇧</span><span
+                                class="key">M</span>
+                        </div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Toggle Chatbot</span>
+                        <div class="shortcut-keys">
+                            <span class="key shortcut-key">Alt</span><span class="key">C</span>
+                        </div>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Paste via Drag & Drop</span>
+                        <div class="shortcut-keys">
+                            <span class="key shortcut-key">Alt</span><span class="key">⇧</span><span
+                                class="key">V</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HackerRank -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <span class="dot dot-orange"></span>
+                        <span style="color: #fb923c;">HackerRank</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Solve Questions <span
+                                class="shortcut-tag tag-beta">BETA</span></span>
+                        <div class="shortcut-keys">
+                            <span class="key">Ctrl</span><span class="key">⇧</span><span class="key">H</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NPTEL -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <span class="dot dot-red"></span>
+                        <span style="color: #f87171;">NPTEL</span>
+                    </div>
+                    <div class="shortcut-row">
+                        <span class="shortcut-desc">Solve MCQs</span>
+                        <div class="shortcut-keys">
+                            <span class="key shortcut-key">Alt</span><span class="key">⇧</span><span
+                                class="key">N</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options Tab -->
+            <div id="options-tab" class="tab-content">
+                <!-- Custom API -->
+                <div class="option-card">
+                    <div class="option-header">
+                        <div>
+                            <div class="option-title">Custom AI Provider</div>
+                            <div class="option-desc">Use your own API key to bypass rate limits</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="useCustomAPI">
+                            <span class="toggle-track"></span>
+                        </label>
+                    </div>
+
+                    <div id="customAPIForm" class="api-form hidden">
+                        <div class="form-group">
+                            <label for="aiProvider" class="form-label">Provider</label>
+                            <select id="aiProvider" class="form-input">
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Claude (Anthropic)</option>
+                                <option value="google">Google Gemini</option>
+                                <option value="deepseek">DeepSeek</option>
+                                <option value="custom">Custom Provider</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group hidden" id="customEndpointDiv">
+                            <label for="customEndpoint" class="form-label">Custom Endpoint</label>
+                            <input type="text" id="customEndpoint" class="form-input"
+                                placeholder="https://api.example.com/v1/chat">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="apiKey" class="form-label">API Key</label>
+                            <input type="password" id="apiKey" class="form-input" placeholder="Enter your API key">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="modelName" class="form-label">Model Name</label>
+                            <input type="text" id="modelName" class="form-input"
+                                placeholder="e.g., gpt-4, claude-3-opus">
+                            <div style="font-size: 0.65rem; color: #475569; margin-top: 4px;">Leave empty for provider
+                                default</div>
+                        </div>
+
+                        <button id="testAPIConfig" class="test-btn">Test Connection</button>
+                    </div>
+                </div>
+
+                <!-- Toast Opacity -->
+                <div class="option-card">
+                    <div class="option-header">
+                        <div>
+                            <div class="option-title">Toast Opacity</div>
+                            <div class="option-desc toggle-info">Shortcut: Alt + O</div>
+                        </div>
+                        <button id="toastOpacityToggle" class="opacity-btn">
+                            <span id="opacityLevel">High</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-bar">
+                <button id="refreshButton" class="btn-secondary">↻ Refresh</button>
+                <button id="logoutButton" class="btn-secondary"
+                    style="color: #fbbf24; border-color: rgba(251, 191, 36, 0.15);">⎋ Logout</button>
+                <button id="uninstallButton" class="btn-danger">Uninstall</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden legacy divs -->
+    <div id="shortcuts" class="hidden"></div>
+    <div id="userInfo" class="hidden"></div>
+
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

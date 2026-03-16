@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tab Switch Detection Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        h1 {
+            color: #38bdf8;
+        }
+
+        .status {
+            padding: 16px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-size: 16px;
+        }
+
+        .ok {
+            background: #064e3b;
+            border: 1px solid #10b981;
+        }
+
+        .fail {
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+
+        #log {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 14px;
+            min-height: 200px;
+            white-space: pre-wrap;
+        }
+
+        .log-entry {
+            margin: 4px 0;
+        }
+
+        .log-ok {
+            color: #10b981;
+        }
+
+        .log-fail {
+            color: #ef4444;
+        }
+
+        .log-info {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Tab Switch Detection Test</h1>
+    <p>This page tests whether the proxy bypass is working. Switch to another tab and come back.</p>
+
+    <div id="results"></div>
+    <h3>Event Log:</h3>
+    <div id="log"></div>
+
+    <script>
+        var log = document.getElementById('log');
+        var results = document.getElementById('results');
+        var tabSwitchDetected = false;
+
+        function addLog(msg, type) {
+            var entry = document.createElement('div');
+            entry.className = 'log-entry log-' + (type || 'info');
+            entry.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // Test 1: Check document.hidden
+        var hiddenTest = document.hidden === false;
+        addLog('document.hidden = ' + document.hidden + (hiddenTest ? ' ✓' : ' ✗'), hiddenTest ? 'ok' : 'fail');
+
+        // Test 2: Check visibilityState
+        var visTest = document.visibilityState === 'visible';
+        addLog('document.visibilityState = "' + document.visibilityState + '"' + (visTest ? ' ✓' : ' ✗'), visTest ? 'ok' : 'fail');
+
+        // Test 3: Check hasFocus
+        var focusTest = document.hasFocus() === true;
+        addLog('document.hasFocus() = ' + document.hasFocus() + (focusTest ? ' ✓' : ' ✗'), focusTest ? 'ok' : 'fail');
+
+        // Test 4: Try to detect tab switch via visibilitychange
+        document.addEventListener('visibilitychange', function () {
+            tabSwitchDetected = true;
+            addLog('⚠ visibilitychange event fired! Bypass NOT working!', 'fail');
+            showResult(false);
+        });
+
+        // Test 5: Try to detect via blur
+        window.addEventListener('blur', function () {
+            tabSwitchDetected = true;
+            addLog('⚠ window blur event fired! Bypass NOT working!', 'fail');
+        });
+
+        window.addEventListener('focus', function () {
+            addLog('⚠ window focus event fired! Bypass NOT working!', 'fail');
+        });
+
+        function showResult(success) {
+            results.innerHTML = '<div class="status ' + (success ? 'ok' : 'fail') + '">' +
+                (success ? '✓ Bypass is ACTIVE — tab switches are invisible to the exam' : '✗ Bypass NOT working — tab switches are being detected') +
+                '</div>';
+        }
+
+        // Initial result
+        if (hiddenTest && visTest && focusTest) {
+            showResult(true);
+            addLog('All initial checks passed. Try switching tabs to verify events are blocked.', 'ok');
+        } else {
+            showResult(false);
+        }
+
+        // Periodic check
+        setInterval(function () {
+            if (!tabSwitchDetected && document.hidden === false && document.visibilityState === 'visible') {
+                // Still good
+            } else if (!tabSwitchDetected) {
+                addLog('⚠ document.hidden changed! Value: ' + document.hidden, 'fail');
+                tabSwitchDetected = true;
+                showResult(false);
+            }
+        }, 500);
+    </script>
+</body>
+
+</html>
