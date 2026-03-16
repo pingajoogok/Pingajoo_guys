@@ -19,11 +19,11 @@ A powerful Chrome extension for students taking tests on **Examly/Iamneo**, **NP
 
 ## ⬇️ Installation
 
-1. [Download](https://github.com/Nithilan-M/publicapi_etldbt/archive/refs/heads/main.zip) the extension
+1. [Download] the extension
 2. Open Chrome and go to `chrome://extensions/`
 3. Enable **Developer mode** in the top right corner
 4. Click **Load unpacked** and select the Pingajoo folder
-5. You're all set — no login required! ✅
+5. You're all set — login required in the extension! ✅
 
 ## 💻 Usage
 
